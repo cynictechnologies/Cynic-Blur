@@ -1,0 +1,310 @@
+version "2.4"
+
+class MBlurHandler : StaticEventHandler
+{
+    int         pitch, yaw;
+    double      xtravel, ytravel;
+    int         lastPreset;
+    bool        presetInitialized;
+    
+    void SetCVarInt(PlayerInfo plr, string name, int value)
+    {
+        CVar cvar = Cvar.GetCVar(name, plr);
+        cvar.SetInt(value);
+    }
+    
+    void SetCVarFloat(PlayerInfo plr, string name, double value)
+    {
+        CVar cvar = Cvar.GetCVar(name, plr);
+        cvar.SetFloat(value);
+    }
+    
+    void SetCVarBool(PlayerInfo plr, string name, bool value)
+    {
+        CVar cvar = Cvar.GetCVar(name, plr);
+        cvar.SetBool(value);
+    }
+    
+    void SaveCurrentAsCustom(PlayerInfo plr)
+    {
+        SetCVarInt(plr, "mblur_custom_samples", Cvar.GetCVar("mblur_samples", plr).GetInt());
+        SetCVarFloat(plr, "mblur_custom_strength", Cvar.GetCVar("mblur_strength", plr).GetFloat());
+        SetCVarFloat(plr, "mblur_custom_strength_walk", Cvar.GetCVar("mblur_strength_walk", plr).GetFloat());
+        SetCVarFloat(plr, "mblur_custom_strength_jump", Cvar.GetCVar("mblur_strength_jump", plr).GetFloat());
+        SetCVarFloat(plr, "mblur_custom_recovery", Cvar.GetCVar("mblur_recovery", plr).GetFloat());
+        SetCVarInt(plr, "mblur_custom_blendmode", Cvar.GetCVar("mblur_blendmode", plr).GetInt());
+        SetCVarBool(plr, "mblur_custom_autostop", Cvar.GetCVar("mblur_autostop", plr).GetBool());
+        SetCVarFloat(plr, "mblur_custom_threshold", Cvar.GetCVar("mblur_threshold", plr).GetFloat());
+        SetCVarFloat(plr, "mblur_custom_recovery2", Cvar.GetCVar("mblur_recovery2", plr).GetFloat());
+        SetCVarBool(plr, "mblur_custom_dynsamps", Cvar.GetCVar("mblur_dynsamps", plr).GetBool());
+        SetCVarInt(plr, "mblur_custom_pcurve", Cvar.GetCVar("mblur_pcurve", plr).GetInt());
+                SetCVarFloat(plr, "mblur_custom_saturation", Cvar.GetCVar("mblur_saturation", plr).GetFloat());
+        SetCVarInt(plr, "mblur_preset", 7);
+        lastPreset = 7;
+    }
+    
+    void ApplyPreset(PlayerInfo plr, int preset)
+    {
+        switch(preset)
+        {
+            case 0:
+                SetCVarInt(plr, "mblur_samples", 10);
+                SetCVarFloat(plr, "mblur_strength", 32.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 15.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 15.0);
+                SetCVarFloat(plr, "mblur_recovery", 80.0);
+                SetCVarInt(plr, "mblur_blendmode", 0);
+                SetCVarBool(plr, "mblur_autostop", true);
+                SetCVarFloat(plr, "mblur_threshold", 20.0);
+                SetCVarFloat(plr, "mblur_recovery2", 95.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 1);
+                SetCVarFloat(plr, "mblur_saturation", 1.2);
+                break;
+            case 1:
+                SetCVarInt(plr, "mblur_samples", 25);
+                SetCVarFloat(plr, "mblur_strength", 64.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 30.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 30.0);
+                SetCVarFloat(plr, "mblur_recovery", 64.0);
+                SetCVarInt(plr, "mblur_blendmode", 0);
+                SetCVarBool(plr, "mblur_autostop", true);
+                SetCVarFloat(plr, "mblur_threshold", 30.0);
+                SetCVarFloat(plr, "mblur_recovery2", 90.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 1);
+                SetCVarFloat(plr, "mblur_saturation", 1.2);
+                break;
+            case 2:
+                SetCVarInt(plr, "mblur_samples", 35);
+                SetCVarFloat(plr, "mblur_strength", 120.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 50.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 50.0);
+                SetCVarFloat(plr, "mblur_recovery", 48.0);
+                SetCVarInt(plr, "mblur_blendmode", 0);
+                SetCVarBool(plr, "mblur_autostop", true);
+                SetCVarFloat(plr, "mblur_threshold", 40.0);
+                SetCVarFloat(plr, "mblur_recovery2", 85.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 1);
+                SetCVarFloat(plr, "mblur_saturation", 1.2);
+                break;
+            case 3:
+                SetCVarInt(plr, "mblur_samples", 50);
+                SetCVarFloat(plr, "mblur_strength", 250.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 80.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 80.0);
+                SetCVarFloat(plr, "mblur_recovery", 32.0);
+                SetCVarInt(plr, "mblur_blendmode", 2);
+                SetCVarBool(plr, "mblur_autostop", false);
+                SetCVarFloat(plr, "mblur_threshold", 50.0);
+                SetCVarFloat(plr, "mblur_recovery2", 80.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 0);
+                SetCVarFloat(plr, "mblur_saturation", 1.2);
+                break;
+            case 4:
+                SetCVarInt(plr, "mblur_samples", 40);
+                SetCVarFloat(plr, "mblur_strength", 180.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 60.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 70.0);
+                SetCVarFloat(plr, "mblur_recovery", 40.0);
+                SetCVarInt(plr, "mblur_blendmode", 1);
+                SetCVarBool(plr, "mblur_autostop", false);
+                SetCVarFloat(plr, "mblur_threshold", 45.0);
+                SetCVarFloat(plr, "mblur_recovery2", 75.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 1);
+                SetCVarFloat(plr, "mblur_saturation", 0.3);
+                break;
+            case 5:
+                SetCVarInt(plr, "mblur_samples", 45);
+                SetCVarFloat(plr, "mblur_strength", 200.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 90.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 100.0);
+                SetCVarFloat(plr, "mblur_recovery", 20.0);
+                SetCVarInt(plr, "mblur_blendmode", 0);
+                SetCVarBool(plr, "mblur_autostop", false);
+                SetCVarFloat(plr, "mblur_threshold", 60.0);
+                SetCVarFloat(plr, "mblur_recovery2", 60.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 0);
+                SetCVarFloat(plr, "mblur_saturation", 0.8);
+                break;
+            case 6:
+                SetCVarInt(plr, "mblur_samples", 45);
+                SetCVarFloat(plr, "mblur_strength", 140.0);
+                SetCVarFloat(plr, "mblur_strength_walk", 35.0);
+                SetCVarFloat(plr, "mblur_strength_jump", 45.0);
+                SetCVarFloat(plr, "mblur_recovery", 55.0);
+                SetCVarInt(plr, "mblur_blendmode", 2);
+                SetCVarBool(plr, "mblur_autostop", true);
+                SetCVarFloat(plr, "mblur_threshold", 30.0);
+                SetCVarFloat(plr, "mblur_recovery2", 88.0);
+                SetCVarBool(plr, "mblur_dynsamps", true);
+                SetCVarInt(plr, "mblur_pcurve", 1);
+                SetCVarFloat(plr, "mblur_saturation", 1.3);
+                break;
+            case 7:
+                SetCVarInt(plr, "mblur_samples", Cvar.GetCVar("mblur_custom_samples", plr).GetInt());
+                SetCVarFloat(plr, "mblur_strength", Cvar.GetCVar("mblur_custom_strength", plr).GetFloat());
+                SetCVarFloat(plr, "mblur_strength_walk", Cvar.GetCVar("mblur_custom_strength_walk", plr).GetFloat());
+                SetCVarFloat(plr, "mblur_strength_jump", Cvar.GetCVar("mblur_custom_strength_jump", plr).GetFloat());
+                SetCVarFloat(plr, "mblur_recovery", Cvar.GetCVar("mblur_custom_recovery", plr).GetFloat());
+                SetCVarInt(plr, "mblur_blendmode", Cvar.GetCVar("mblur_custom_blendmode", plr).GetInt());
+                SetCVarBool(plr, "mblur_autostop", Cvar.GetCVar("mblur_custom_autostop", plr).GetBool());
+                SetCVarFloat(plr, "mblur_threshold", Cvar.GetCVar("mblur_custom_threshold", plr).GetFloat());
+                SetCVarFloat(plr, "mblur_recovery2", Cvar.GetCVar("mblur_custom_recovery2", plr).GetFloat());
+                SetCVarBool(plr, "mblur_dynsamps", Cvar.GetCVar("mblur_custom_dynsamps", plr).GetBool());
+                SetCVarInt(plr, "mblur_pcurve", Cvar.GetCVar("mblur_custom_pcurve", plr).GetInt());
+                SetCVarFloat(plr, "mblur_saturation", Cvar.GetCVar("mblur_custom_saturation", plr).GetFloat());
+                break;
+        }
+    }
+    
+    override void PlayerEntered(PlayerEvent e)
+    {
+        PlayerInfo plr = players[e.PlayerNumber];
+        if(plr)
+        {    
+            xtravel = 0;
+            ytravel = 0;
+            lastPreset = -1;
+            presetInitialized = false;
+        }
+    }
+    
+    override void WorldTick()
+    {
+        PlayerInfo plr = players[consoleplayer];
+        if(plr)
+        {
+            int saveTrigger = Cvar.GetCVar("mblur_savecustom_trigger", plr).GetInt();
+            if(saveTrigger != 0)
+            {
+                SaveCurrentAsCustom(plr);
+                SetCVarInt(plr, "mblur_savecustom_trigger", 0);
+            }
+            
+            int currentPreset = Cvar.GetCVar("mblur_preset", plr).GetInt();
+            if(!presetInitialized || currentPreset != lastPreset)
+            {
+                ApplyPreset(plr, currentPreset);
+                lastPreset = currentPreset;
+                presetInitialized = true;
+            }
+        }
+        
+        if(plr && plr.health > 0 && Cvar.GetCVar("mblur", plr).GetBool())
+        {
+            yaw     = plr.mo.GetPlayerInput(ModInput_Yaw);
+            pitch   = -plr.mo.GetPlayerInput(ModInput_Pitch);
+        }
+    }
+    
+    override void NetworkProcess(ConsoleEvent e)
+    {
+        PlayerInfo plr = players[e.Player];
+        if(plr && e.Name == "liveupdate")
+        {
+            bool autostop = Cvar.GetCVar("mblur_autostop", plr).GetBool();
+            int pcurve = Cvar.GetCVar("mblur_pcurve", plr).GetInt();
+            
+            double pitchcurve;
+            if(pcurve == 1) pitchcurve = sin(90. - abs(plr.mo.pitch));
+            else            pitchcurve = sqrt(1. - abs(plr.mo.pitch * 1. / 90));
+            
+            double amount       = Cvar.GetCVar("mblur_strength", plr).GetFloat() * 10. / 32767 * pitchcurve;
+            double amount_walk   = Cvar.GetCVar("mblur_strength_walk", plr).GetFloat() * .1;
+            double amount_jump   = Cvar.GetCVar("mblur_strength_jump", plr).GetFloat() * .1 * pitchcurve;
+            double decay         = 1. - Cvar.GetCVar("mblur_recovery", plr).GetFloat() * .01;
+            
+            // Calculate walk velocity contribution first
+            double walkX = 0;
+            double walkY = 0;
+            double velLength = plr.mo.vel.x*plr.mo.vel.x + plr.mo.vel.y*plr.mo.vel.y;
+            if(velLength > 0)
+            {
+                double invLength = 1.0 / sqrt(velLength);
+                double dirX = plr.mo.vel.x * invLength;
+                double dirY = plr.mo.vel.y * invLength;
+                
+                // Convert player angle from degrees to radians for calculation
+                double playerAngleRad = (plr.mo.angle + 180.0) * 3.14159265358979323846 / 180.0;
+                double velAngleRad = atan2(dirY, dirX);
+                double angle = velAngleRad - playerAngleRad;
+                
+                double sidevel = sin(angle) * sqrt(velLength);
+                double walkvel = cos(angle) * sqrt(velLength);
+                if(plr.mo.pitch > 0) walkvel = -walkvel;
+                
+                walkX = sidevel * amount_walk * .625;
+                walkY = plr.mo.vel.z * amount_jump + walkvel * amount_walk * (1. - pitchcurve);
+            }
+            
+            // Apply decay and add all contributions together
+            xtravel = xtravel * decay + yaw * amount * .625 + walkX;
+            ytravel = ytravel * decay + pitch * amount + walkY;
+            
+            if(autostop)
+            {
+                double threshold = Cvar.GetCVar("mblur_threshold", plr).GetFloat() * 30;
+                double decay2 = 1 - Cvar.GetCVar("mblur_recovery2", plr).GetFloat() * .01;
+                if(abs(yaw) <= threshold) xtravel *= decay2;
+                if(abs(pitch) <= threshold) ytravel *= decay2;
+            }
+        }
+    }
+    
+    override void UiTick()
+    {
+        PlayerInfo plr = players[consoleplayer];
+        
+        if(plr && plr.health > 0)
+        {
+            bool mblurEnabled = Cvar.GetCVar("mblur", plr).GetBool();
+            if(mblurEnabled)
+            {
+                EventHandler.SendNetworkEvent("liveupdate");
+                
+                double xclamp = xtravel;
+                double yclamp = ytravel;
+                if(xclamp > 1000.0) xclamp = 1000.0;
+                if(xclamp < -1000.0) xclamp = -1000.0;
+                if(yclamp > 1000.0) yclamp = 1000.0;
+                if(yclamp < -1000.0) yclamp = -1000.0;
+                
+                vector2 steps = (
+                    (xclamp / screen.getwidth()),
+                    (yclamp / screen.getheight())
+                );
+                
+                int baseSamples = Cvar.GetCVar("mblur_samples", plr).GetInt();
+                bool dynsampsEnabled = Cvar.GetCVar("mblur_dynsamps", plr).GetBool();
+                int blendMode = Cvar.GetCVar("mblur_blendmode", plr).GetInt();
+                
+                bool useDynSamps = dynsampsEnabled && (blendMode != 2);
+                
+                double dist = sqrt(steps.x*steps.x + steps.y*steps.y);
+                if(dist > 1.0) dist = 1.0;
+                
+                double dynsamps = useDynSamps ? min(dist * 12, 3.0) : 1.0;
+                int copies = 1 + int(baseSamples * dynsamps);
+                if(copies > 50) copies = 50;
+                double increment = 1.0 / copies;
+                
+                Shader.SetUniform2f(plr, "MBlur", "steps", steps * increment);
+                Shader.SetUniform1i(plr, "MBlur", "samples", copies);
+                Shader.SetUniform1f(plr, "MBlur", "increment", increment);
+                Shader.SetUniform1i(plr, "MBlur", "blendmode", Cvar.GetCVar("mblur_blendmode", plr).GetInt());
+                Shader.SetUniform1f(plr, "MBlur", "saturation", Cvar.GetCVar("mblur_saturation", plr).GetFloat());
+                
+                Shader.SetEnabled(plr, "MBlur", true);
+            }
+            else
+            {
+                Shader.SetEnabled(plr, "MBlur", false);
+            }
+        }
+    }
+}
