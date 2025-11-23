@@ -1,0 +1,62 @@
+AddOptionMenu "OptionsMenu"
+{
+    Submenu "Motion Blur", "MBlurOpts"
+}
+
+OptionValue "MBlurBlendModes"
+{
+    0, "Normal"
+    1, "Lighten"
+    2, "Additive"
+}
+
+OptionValue "MBlurCurves"
+{
+    0, "Power"
+    1, "Sine"
+}
+
+OptionValue "MBlurPresets"
+{
+    0, "Light"
+    1, "Medium"
+    2, "Heavy"
+    3, "Extreme"
+    4, "Horror"
+    5, "Drunk"
+    6, "Dream"
+    7, "Custom"
+}
+
+OptionMenu "MBlurAdvOpts"
+{
+    Position -15
+    Title "Advanced Settings"
+    Option "Auto Stop", "mblur_autostop", OnOff
+    Slider "Stop Recovery", "mblur_recovery2", 0, 100, 5, 2
+    Slider "Stop Threshold", "mblur_threshold", 0, 100, 10, 2
+    statictext ""
+    Option "Pitch Curve", "mblur_pcurve", "MBlurCurves"
+}
+
+OptionMenu "MBlurOpts"
+{
+    Position -15
+    Title "Motion Blur"
+    Option "Enabled", "mblur", YesNo
+    statictext ""
+    Option "Preset", "mblur_preset", "MBlurPresets"
+    Command "Save Current as Custom", "mblur_savecustom_trigger 1"
+    statictext ""
+    Option "Blend Mode", "mblur_blendmode", "MBlurBlendModes"
+    statictext ""
+    Slider "Samples", "mblur_samples", 1, 50, 1, 0
+    Option "Dynamic", "mblur_dynsamps", YesNo
+    statictext ""
+    Slider "Look Strength", "mblur_strength", 1, 500, 8, 2
+    Slider "Walk Strength", "mblur_strength_walk", 1, 100, 5, 2
+    Slider "Jump Strength", "mblur_strength_jump", 1, 100, 5, 2
+    Slider "Saturation", "mblur_saturation", 0.1, 3.0, 0.1, 1
+    Slider "Recovery", "mblur_recovery", 4, 100, 4, 1
+    Submenu "Advanced...", "MBlurAdvOpts"
+}
